@@ -3,6 +3,7 @@
 #include <string>
 #include <codecvt>
 #include <locale>
+#include <fstream> // For file operations
 using namespace std;
 
 class FileManager {
@@ -34,6 +35,14 @@ private:
         return MoveFileW(source.c_str(), destination.c_str()) != 0;
     }
 
+    bool touchFile(const wstring& filePath) {
+        wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
+        string utf8FilePath = converter.to_bytes(filePath);
+        ofstream file(utf8FilePath);
+    return file.good();
+}
+
+
 public:
     FileManager() : currentDirectory(L".") {}
 
@@ -42,7 +51,7 @@ public:
 
         while (true) {
             cout << "\n\t\t========================" << endl;
-            cout<<  "\t\t|  Basic File Manager   |\n";
+            cout << "\t\t|  Basic File Manager   |\n";
             cout << "\t\t========================" << endl;
             wcout << "\tCurrent Directory: " << currentDirectory << endl;
             cout << "\tAvailable commands:" << endl;
@@ -51,7 +60,8 @@ public:
             cout << "\t3. Copy file (cp)" << endl;
             cout << "\t4. Move file (mv)" << endl;
             cout << "\t5. Change directory (cd)" << endl;
-            cout << "\t6. Exit" << endl;
+            cout << "\t6. Create empty file (touch)" << endl;
+            cout << "\t7. Exit" << endl;
             cout << "  =>Enter command number or its abbreviation: ";
             cin >> command;
 
@@ -63,9 +73,9 @@ public:
                 cout << "\tEnter directory name: ";
                 cin >> newDirName;
                 if (createDirectory(currentDirectory + L"\\" + wstring(newDirName.begin(), newDirName.end())))
-                    cout << "\tDirectory created successfully :) ." << endl;
+                    cout << "\tDirectory created successfully: " << newDirName << endl;
                 else
-                    cout << "\tFailed to create directory !!" << endl;
+                    cout << "\tFailed to create directory: " << newDirName << endl;
             }
             else if (command == "cp" || command == "3") {
                 string source, destination;
@@ -74,9 +84,9 @@ public:
                 cout << "\tEnter destination file path: ";
                 cin >> destination;
                 if (copyFile(wstring(source.begin(), source.end()), wstring(destination.begin(), destination.end())))
-                    cout << "\tFile copied successfully :) ." << endl;
+                    cout << "\tFile copied successfully." << endl;
                 else
-                    cout << "\tFailed to copy file !!" << endl;
+                    cout << "\tFailed to copy file." << endl;
             }
             else if (command == "mv" || command == "4") {
                 string source, destination;
@@ -85,9 +95,9 @@ public:
                 cout << "\tEnter destination file path: ";
                 cin >> destination;
                 if (moveFile(wstring(source.begin(), source.end()), wstring(destination.begin(), destination.end())))
-                    cout << "\tFile moved successfully :) ." << endl;
+                    cout << "\tFile moved successfully." << endl;
                 else
-                    cout << "\tFailed to move file !! " << endl;
+                    cout << "\tFailed to move file." << endl;
             }
             else if (command == "cd" || command == "5") {
                 string newDir;
@@ -95,14 +105,24 @@ public:
                 cin >> newDir;
                 currentDirectory = wstring(newDir.begin(), newDir.end());
             }
-            else if (command == "exit" || command == "6") {
-                cout<<"\t\t==========================\n";
-                cout<<"\t\t Thanks To use My App  :) \n";
-                cout<<"\t\t==========================\n\n";
+            else if (command == "touch" || command == "6") {
+                string fileName;
+                cout << "\tEnter file name: ";
+                cin >> fileName;
+                wstring filePath = currentDirectory + L"\\" + wstring(fileName.begin(), fileName.end());
+                if (touchFile(filePath))
+                    cout << "\tFile created successfully: " << fileName << endl;
+                else
+                    cout << "\tFailed to create file: " << fileName << endl;
+            }
+            else if (command == "exit" || command == "7") {
+                cout << "\t\t==========================\n";
+                cout << "\t\t Thanks for using My App :)\n";
+                cout << "\t\t==========================\n\n";
                 break;
             }
             else {
-                cout << "\tInvalid command, Please try again!!" << endl;
+                cout << "\tInvalid command, Please try again!" << endl;
             }
 
             // Clear the screen after each command and wait for 2 seconds
